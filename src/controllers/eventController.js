@@ -14,7 +14,7 @@ export const createEvent = async (req, res, next) => {
 
     const event = await Event.create({ categoryId, name, image: imageId });
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
     const eventData = event.toJSON();
     eventData.imageUrl = imageId ? `${baseUrl}api/images/${imageId}` : null;
 
@@ -28,7 +28,7 @@ export const createEvent = async (req, res, next) => {
 export const getAllEvents = async (req, res, next) => {
   try {
     const events = await Event.findAll({ order: [["id", "ASC"]] });
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
 
     const result = events.map((evt) => ({
       id: evt.id,
@@ -55,7 +55,7 @@ export const getEventById = async (req, res, next) => {
         .status(404)
         .json({ success: false, message: "Event not found" });
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
     const eventData = event.toJSON();
     eventData.imageUrl = event.image
       ? `${baseUrl}api/images/${event.image}`
@@ -89,7 +89,7 @@ export const updateEvent = async (req, res, next) => {
 
     await event.update({ categoryId, name, image: imageId });
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
     const eventData = event.toJSON();
     eventData.imageUrl = imageId ? `${baseUrl}api/images/${imageId}` : null;
 
