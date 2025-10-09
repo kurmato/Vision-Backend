@@ -34,9 +34,6 @@ const Event = sequelize.define(
       {
         fields: ["categoryId"],
       },
-      {
-        fields: ["eventType"],
-      },
     ],
   }
 );

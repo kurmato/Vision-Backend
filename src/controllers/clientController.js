@@ -1,100 +1,139 @@
 import Client from "../models/Client.js";
-import path from "path";
-import fs from "fs";
+import { saveImage, deleteImage } from "../services/imageService.js";
 
-// ✅ Add new client
-export const addClient = async (req, res) => {
+// ✅ Create a new client
+export const createClient = async (req, res, next) => {
   try {
     const { name } = req.body;
-    const image = req.file ? `/uploads/clients/${req.file.filename}` : null;
+    let imageId = null;
 
-    if (!name || !image) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Name and image are required" });
+    if (req.file) {
+      const savedImage = await saveImage(req.file);
+      imageId = savedImage.id;
     }
 
-    const client = await Client.create({ name, image });
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Client added successfully",
-        data: client,
-      });
+    const client = await Client.create({
+      name,
+      image: imageId,
+    });
+
+    const baseUrl = process.env.BASE_URL;
+    const clientData = client.toJSON();
+    clientData.imageUrl = imageId ? `${baseUrl}api/images/${imageId}` : null;
+
+    res.status(201).json({
+      success: true,
+      message: "Client created successfully",
+      data: clientData,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server Error" });
+    next(error);
   }
 };
 
 // ✅ Get all clients
-export const getAllClients = async (req, res) => {
+export const getAllClients = async (req, res, next) => {
   try {
-    const clients = await Client.findAll();
-    res.status(200).json({ success: true, data: clients });
+    const clients = await Client.findAll({ order: [["name", "ASC"]] });
+    const baseUrl = process.env.BASE_URL;
+
+    const result = clients.map((c) => ({
+      id: c.id,
+      name: c.name,
+      imageUrl: c.image ? `${baseUrl}api/images/${c.image}` : null,
+      createdAt: c.createdAt,
+    }));
+
+    res.json({ success: true, message: "Clients fetched successfully", data: result });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server Error" });
+    next(error);
+  }
+};
+
+// ✅ Get single client by ID
+export const getClientById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const client = await Client.findByPk(id);
+
+    if (!client) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Client not found" });
+    }
+
+    const baseUrl = process.env.BASE_URL;
+    const clientData = client.toJSON();
+    clientData.imageUrl = client.image ? `${baseUrl}api/images/${client.image}` : null;
+
+    res.json({ success: true, data: clientData });
+  } catch (error) {
+    next(error);
   }
 };
 
 // ✅ Update client
-export const updateClient = async (req, res) => {
+export const updateClient = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
     const client = await Client.findByPk(id);
 
-    if (!client)
+    if (!client) {
       return res
         .status(404)
-        .json({ success: false, message: "Client not found" });
-
-    if (req.file) {
-      // delete old image
-      if (client.image) {
-        const oldPath = path.join("src", client.image);
-        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-      }
-      client.image = `/uploads/clients/${req.file.filename}`;
+        .json({ success: false, error: "Client not found" });
     }
 
-    if (name) client.name = name;
-    await client.save();
+    let imageId = client.image;
 
-    res
-      .status(200)
-      .json({ success: true, message: "Client updated", data: client });
+    if (req.file) {
+      // Delete old image if exists
+      if (imageId) await deleteImage(imageId);
+
+      // Save new image
+      const savedImage = await saveImage(req.file);
+      imageId = savedImage.id;
+    }
+
+    await client.update({ name, image: imageId });
+
+    const baseUrl = process.env.BASE_URL;
+    const clientData = client.toJSON();
+    clientData.imageUrl = imageId ? `${baseUrl}api/images/${imageId}` : null;
+
+    res.json({
+      success: true,
+      message: "Client updated successfully",
+      data: clientData,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server Error" });
+    next(error);
   }
 };
 
 // ✅ Delete client
-export const deleteClient = async (req, res) => {
+export const deleteClient = async (req, res, next) => {
   try {
     const { id } = req.params;
     const client = await Client.findByPk(id);
 
-    if (!client)
+    if (!client) {
       return res
         .status(404)
-        .json({ success: false, message: "Client not found" });
-
-    // delete image file
-    if (client.image) {
-      const oldPath = path.join("src", client.image);
-      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        .json({ success: false, error: "Client not found" });
     }
 
+    // Delete associated image if exists
+    if (client.image) await deleteImage(client.image);
+
     await client.destroy();
-    res
-      .status(200)
-      .json({ success: true, message: "Client deleted successfully" });
+
+    res.json({
+      success: true,
+      message: "Client deleted successfully",
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server Error" });
+    next(error);
   }
 };

@@ -23,7 +23,7 @@ export const createCategory = async (req, res, next) => {
     // Include image URL in response
     let categoryData = category.toJSON();
     if (imageId) {
-      const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+      const baseUrl = process.env.BASE_URL;
       categoryData.imageUrl = `${baseUrl}api/images/${imageId}`;
     } else {
       categoryData.imageUrl = null;
@@ -39,7 +39,7 @@ export const createCategory = async (req, res, next) => {
 export const getAllCategories = async (req, res, next) => {
   try {
     const categories = await Category.findAll({ order: [["name", "ASC"]] });
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
 
     const result = categories.map((cat) => ({
       id: cat.id,
@@ -66,7 +66,7 @@ export const getCategoryById = async (req, res, next) => {
         .json({ success: false, error: "Category not found" });
     }
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
     const categoryData = category.toJSON();
     categoryData.imageUrl = category.image
       ? `${baseUrl}api/images/${category.image}`
@@ -107,7 +107,7 @@ export const updateCategory = async (req, res, next) => {
 
     await category.update({ name, image: imageId });
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
     const categoryData = category.toJSON();
     categoryData.imageUrl = imageId ? `${baseUrl}api/images/${imageId}` : null;
 

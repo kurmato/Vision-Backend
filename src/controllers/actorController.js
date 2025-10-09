@@ -65,7 +65,7 @@ export const createActor = async (req, res, next) => {
       profileImage: profileImageId,
     });
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
     const actorData = formatActorResponse(actor, baseUrl);
 
     res.status(201).json({ success: true, data: actorData });
@@ -118,7 +118,7 @@ export const getAllActors = async (req, res, next) => {
       order: [[sortBy, order.toUpperCase()]],
     });
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
     const data = actors.map((actor) => formatActorResponse(actor, baseUrl));
 
     res.json({
@@ -148,7 +148,7 @@ export const getActorById = async (req, res, next) => {
       });
     }
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
     const data = formatActorResponse(actor, baseUrl);
 
     res.json({ success: true, data });
@@ -172,7 +172,7 @@ export const getActorsByCategory = async (req, res, next) => {
       order: [["createdAt", "DESC"]],
     });
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
     const data = actors.map((actor) => formatActorResponse(actor, baseUrl));
 
     res.json({
@@ -200,7 +200,7 @@ export const getActorsByTier = async (req, res, next) => {
       order: [["name", "ASC"]],
     });
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
     const data = actors.map((actor) => formatActorResponse(actor, baseUrl));
 
     res.json({ success: true, count: data.length, data });
@@ -238,7 +238,7 @@ export const searchActors = async (req, res, next) => {
       order: [["createdAt", "DESC"]],
     });
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
     const data = actors.map((actor) => formatActorResponse(actor, baseUrl));
 
     res.json({
@@ -278,7 +278,7 @@ export const patchActor = async (req, res, next) => {
 
     await actor.update(updatedFields);
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
     const data = formatActorResponse(actor, baseUrl);
 
     res.json({ success: true, data });
@@ -311,7 +311,7 @@ export const updateActorImage = async (req, res, next) => {
     const savedImage = await saveImage(req.file);
     await actor.update({ profileImage: savedImage.id });
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
     const data = formatActorResponse(actor, baseUrl);
 
     res.json({ success: true, data });
@@ -345,7 +345,6 @@ export const deleteActor = async (req, res, next) => {
   }
 };
 
-
 export const uploadActorGallery = async (req, res, next) => {
   try {
     const { actorId } = req.body;
@@ -369,7 +368,7 @@ export const uploadActorGallery = async (req, res, next) => {
       )
     );
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
     const data = galleryEntries.map((entry) => ({
       id: entry.id,
       actorId: entry.actorId,
@@ -388,7 +387,7 @@ export const getActorGallery = async (req, res, next) => {
     const { actorId } = req.params;
     const gallery = await ActorGallery.findAll({ where: { actorId } });
 
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000/";
+    const baseUrl = process.env.BASE_URL;
     const data = gallery.map((entry) => ({
       id: entry.id,
       actorId: entry.actorId,

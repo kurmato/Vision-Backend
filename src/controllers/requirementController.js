@@ -1,5 +1,5 @@
+import EmailVerification from "../models/EmailVerification.js";
 import Requirement from "../models/Requirement.js";
-import { Op } from "sequelize";
 
 export const createRequirement = async (req, res) => {
   try {
@@ -16,14 +16,33 @@ export const createRequirement = async (req, res) => {
       additionalInfo,
     } = req.body;
 
-    // Validate required fields
-    if (!occasions || !eventDate || !city || !fullName || !email || !mobileNumber) {
+    if (
+      !occasions ||
+      !eventDate ||
+      !city ||
+      !fullName ||
+      !email ||
+      !mobileNumber
+    ) {
       return res.status(400).json({
         success: false,
         message: "Missing required fields",
       });
     }
 
+    // ✅ Check email verification
+    const verified = await EmailVerification.findOne({
+      where: { email, verified: true },
+    });
+
+    if (!verified) {
+      return res.status(400).json({
+        success: false,
+        message: "Please verify your email before submitting",
+      });
+    }
+
+    // ✅ Proceed to create requirement
     const requirement = await Requirement.create({
       eventId,
       categoryId,
@@ -35,6 +54,7 @@ export const createRequirement = async (req, res) => {
       email,
       mobileNumber,
       additionalInfo,
+      isEmailVerified: true, 
     });
 
     res.status(201).json({
@@ -55,8 +75,17 @@ export const createRequirement = async (req, res) => {
 // Get all requirements with optional filters
 export const getAllRequirements = async (req, res) => {
   try {
-    const { page = 1, limit = 10, city, email, eventId, categoryId, startDate, endDate } = req.query;
-    
+    const {
+      page = 1,
+      limit = 10,
+      city,
+      email,
+      eventId,
+      categoryId,
+      startDate,
+      endDate,
+    } = req.query;
+
     const offset = (page - 1) * limit;
     const where = {};
 
@@ -65,7 +94,7 @@ export const getAllRequirements = async (req, res) => {
     if (email) where.email = email;
     if (eventId) where.eventId = eventId;
     if (categoryId) where.categoryId = categoryId;
-    
+
     if (startDate && endDate) {
       where.eventDate = {
         [Op.between]: [new Date(startDate), new Date(endDate)],

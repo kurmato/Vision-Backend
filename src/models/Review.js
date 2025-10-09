@@ -13,7 +13,7 @@ const ActorReview = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Actor",
+        model: "actors",
         key: "id",
       },
     },
