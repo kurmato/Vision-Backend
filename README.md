@@ -31,20 +31,20 @@ A comprehensive RESTful API for event and performer booking platform built with 
 src/
 ├── config/
 │   ├── db.js              # Database configuration
-│   ├── mailer.js          # Email configuration
-│   └── otp.js             # OTP configuration
+│   └── mailer.js          # Email configuration and OTP configuration
 ├── models/
-│   ├── index.js           # Model associations
-│   ├── Images.js          # Image storage model
-│   ├── Category.js        # Category model
-│   ├── Event.js           # Event model
 │   ├── Actor.js           # Actor/Performer model
 │   ├── ActorGallery.js    # Actor gallery images
+│   ├── Category.js        # Category model
+│   ├── Client.js          # Client model
+│   ├── Contact.js         # Contact form model
+│   ├── index.js           # Model associations
+│   ├── Images.js          # Image storage model
+
+│   ├── Event.js           # Event model
 │   ├── Review.js          # Reviews model
-│   ├── UserOtp.js         # OTP verification model
 │   ├── Requirement.js     # Requirements model
 │   ├── Booking.js         # Bookings model
-│   ├── Contact.js         # Contact form model
 │   └── GetInTouch.js      # Get in touch model
 ├── controllers/
 │   ├── actorController.js
